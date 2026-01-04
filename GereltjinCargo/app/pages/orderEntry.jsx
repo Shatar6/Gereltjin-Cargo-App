@@ -71,7 +71,7 @@ export const OrderEntryScreen = ({ navigation }) => {
             customerPhone: '',
             pickupAddress: '',
             cargoType: '',
-            weight: '',
+            weight: '', 
             notes: '',
           });
           setPhoto(null);
@@ -100,7 +100,7 @@ export const OrderEntryScreen = ({ navigation }) => {
         />
         
         <Input
-          placeholder="Утасны Дугаар"
+          placeholder="Утасны Дугаар *"
           value={formData.customerPhone}
           onChangeText={(value) => handleInputChange('customerPhone', value)}
           keyboardType="phone-pad"
