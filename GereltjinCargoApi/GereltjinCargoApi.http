@@ -1,0 +1,6 @@
+@GereltjinCargoApi_HostAddress = http://localhost:5258
+
+GET {{GereltjinCargoApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
