@@ -19,6 +19,7 @@ export const OrdersListScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const data = await ordersService.getOrders(searchTerm);
+      console.log('Loaded orders:', data);
       setOrders(data);
     } catch (error) {
       Alert.alert('Error', 'Failed to load orders');
@@ -86,30 +87,30 @@ export const OrdersListScreen = ({ navigation }) => {
       <ListItem.Content>
         <View style={styles.orderHeader}>
           <ListItem.Title style={styles.orderNumber}>
-            {item.orderNumber}
+            {item.order_number}
           </ListItem.Title>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-            <Text style={styles.statusText}>{item.status || 'Pending'}</Text>
+            <Text style={styles.statusText}>{item.status || 'Хүлээгдэж байна'}</Text>
           </View>
         </View>
         
         <ListItem.Subtitle style={styles.customerName}>
-          Customer: {item.customerName}
+          Үйлчлүүлэгч: {item.customer_name}
         </ListItem.Subtitle>
         
-        <Text style={styles.address}>From: {item.pickupAddress}</Text>
-        <Text style={styles.address}>To: {item.deliveryAddress}</Text>
-        
-        {item.cargoType && (
-          <Text style={styles.cargoInfo}>Type: {item.cargoType}</Text>
+        <Text style={styles.address}>Ачаа авсан газар: {item.pickup_address}</Text>
+        <Text style={styles.address}>Ачаа авсан ажилтан: {item.worker_id}</Text>
+
+        {item.cargo_type && (
+          <Text style={styles.cargoInfo}>Төрөл: {item.cargo_type}</Text>
         )}
         
         {item.weight && (
-          <Text style={styles.cargoInfo}>Weight: {item.weight} kg</Text>
+          <Text style={styles.cargoInfo}>Жин: {item.weight} kg</Text>
         )}
         
         <Text style={styles.date}>
-          Created: {new Date(item.createdAt).toLocaleDateString()}
+          Хүлээн авсан огноо: {new Date(item.created_at).toLocaleDateString()}
         </Text>
       </ListItem.Content>
       <ListItem.Chevron />
@@ -118,22 +119,21 @@ export const OrdersListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header
-        centerComponent={{ text: `Welcome, ${user?.name}`, style: { color: '#fff' } }}
-        rightComponent={
-          <Button
-            title="Logout"
-            onPress={handleLogout}
-            type="clear"
-            titleStyle={{ color: '#fff' }}
-            icon={{ name: 'logout', type: 'material', color: '#fff' }}
-          />
-        }
-        backgroundColor="#2196F3"
-      />
+      <View style={styles.headerBox}>
+        <Text style={{ color: '#fff', fontSize: 18 }}>
+          Сайн уу, {user?.name}
+        </Text>
+        <Button
+          title="Logout"
+          onPress={handleLogout}
+          type="clear"
+          titleStyle={{ color: '#fff' }}
+          icon={{ name: 'logout', type: 'material', color: '#fff' }}
+        />
+      </View>
       
       <SearchBar
-        placeholder="Search by order # or customer..."
+        placeholder="Захиалга хайх..."
         onChangeText={handleSearch}
         value={search}
         platform="default"
@@ -143,7 +143,7 @@ export const OrdersListScreen = ({ navigation }) => {
       
       {orders.length === 0 && !loading ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No orders found</Text>
+          <Text style={styles.emptyText}>Захиалга олдсонгүй</Text>
         </View>
       ) : (
         <FlatList
@@ -174,6 +174,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  headerBox: {
+    height: 60, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    backgroundColor: '#2196F3',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 15,
   },
   searchBar: {
     backgroundColor: '#fff',

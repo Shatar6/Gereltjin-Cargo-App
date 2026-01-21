@@ -56,7 +56,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
       <ScrollView>
         <Card containerStyle={styles.headerCard}>
           <View style={styles.header}>
-            <Text h4>{order.orderNumber}</Text>
+            <Text h4>{order.order_number}</Text>
             <Button
               title="✕"
               type="арилгах"
@@ -75,15 +75,15 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           <ListItem>
             <ListItem.Content>
               <ListItem.Title>Нэр</ListItem.Title>
-              <ListItem.Subtitle>{order.customerName}</ListItem.Subtitle>
+              <ListItem.Subtitle>{order.customer_name}</ListItem.Subtitle>
             </ListItem.Content>
           </ListItem>
           
-          {order.customerPhone && (
+          {order.customer_phone && (
             <ListItem>
               <ListItem.Content>
                 <ListItem.Title>Утасны Дугаар</ListItem.Title>
-                <ListItem.Subtitle>{order.customerPhone}</ListItem.Subtitle>
+                <ListItem.Subtitle>{order.customer_phone}</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
           )}
@@ -94,7 +94,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           <ListItem>
             <ListItem.Content>
               <ListItem.Title>Хүлээн Авсан Хаяг</ListItem.Title>
-              <ListItem.Subtitle>{order.pickupAddress}</ListItem.Subtitle>
+              <ListItem.Subtitle>{order.pickup_address}</ListItem.Subtitle>
             </ListItem.Content>
           </ListItem>
           
@@ -102,11 +102,11 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
 
         <Card>
           <Text style={styles.sectionTitle}>Ачааны Мэдээлэл</Text>
-          {order.cargoType && (
+          {order.cargo_type && (
             <ListItem>
               <ListItem.Content>
                 <ListItem.Title>Төрөл</ListItem.Title>
-                <ListItem.Subtitle>{order.cargoType}</ListItem.Subtitle>
+                <ListItem.Subtitle>{order.cargo_type}</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
           )}
@@ -151,11 +151,11 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
 
         <Card>
           <Text style={styles.timestamp}>
-            Үүссэн Огноо: {new Date(order.createdAt).toLocaleString()}
+            Үүссэн Огноо: {new Date(order.created_at).toLocaleString()}
           </Text>
-          {order.updatedAt && (
+          {order.updated_at && (
             <Text style={styles.timestamp}>
-              Шинчлэсэн Огноо: {new Date(order.updatedAt).toLocaleString()}
+              Шинчлэсэн Огноо: {new Date(order.updated_at).toLocaleString()}
             </Text>
           )}
         </Card>

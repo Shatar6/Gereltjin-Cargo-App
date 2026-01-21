@@ -57,3 +57,4 @@ C:\Users\munkh\OneDrive\Desktop\Gereltjin Cargo\GereltjinCargoApi\obj\Debug\net8
 C:\Users\munkh\OneDrive\Desktop\Gereltjin Cargo\GereltjinCargoApi\obj\Debug\net8.0\GereltjinCargoApi.pdb
 C:\Users\munkh\OneDrive\Desktop\Gereltjin Cargo\GereltjinCargoApi\obj\Debug\net8.0\GereltjinCargoApi.genruntimeconfig.cache
 C:\Users\munkh\OneDrive\Desktop\Gereltjin Cargo\GereltjinCargoApi\obj\Debug\net8.0\ref\GereltjinCargoApi.dll
+C:\Users\munkh\OneDrive\Desktop\Gereltjin Cargo\GereltjinCargoApi\obj\Debug\net8.0\GereltjinCargoApi.sourcelink.json
