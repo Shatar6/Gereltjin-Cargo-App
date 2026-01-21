@@ -9,12 +9,19 @@ namespace GereltjinCargoApi.Models
         public string pickup_address { get; set; } = string.Empty;
         public string? cargo_type { get; set; }
         public decimal? weight { get; set; }
-        public string status { get; set; } = "pending";
+        public string status { get; set; } = "Хүлээгдэж байна";
         public Guid? worker_id { get; set; }
         public string? notes { get; set; }
         public string? photo_url { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
+
+        public decimal? price { get; set; }
+        public string receiver_name { get; set; }
+        public string receiver_phone { get; set; }
+
+        public Worker Worker { get; set; }
+        public ICollection<OrderHistory> History { get; set; }
     }
     
     public class LoginRequest
