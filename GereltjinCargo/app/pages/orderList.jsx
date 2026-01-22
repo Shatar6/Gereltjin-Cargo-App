@@ -112,15 +112,20 @@ export const OrdersListScreen = ({ navigation }) => {
             {item.order_number}
           </ListItem.Title>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-            <Text style={styles.statusText}>{item.status || 'Хүлээгдэж байна'}</Text>
+            <Text style={styles.statusText}>{getStatusLabel(item.status)}</Text>
           </View>
         </View>
+
+        <View style={styles.orderHeader}>
+          <ListItem.Subtitle>
+            <Text style={styles.customerName}>Илгээгч: {item.customer_name}</Text>
+          </ListItem.Subtitle>
+              {item.receiver_name && (
+                <Text style={styles.customerName}>Хүлээн авагч: {item.receiver_name}</Text>
+              )}
+        </View>
         
-        <ListItem.Subtitle style={styles.customerName}>
-          Үйлчлүүлэгч: {item.customer_name}
-        </ListItem.Subtitle>
-        
-        <Text style={styles.address}>Ачаа авсан газар: {item.pickup_address}</Text>
+        <Text style={styles.address}>Ачаа авсан хаяг: {item.pickup_address}</Text>
         <Text style={styles.address}>Ачаа авсан ажилтан: {item.worker_id}</Text>
 
         {item.cargo_type && (
@@ -129,6 +134,10 @@ export const OrdersListScreen = ({ navigation }) => {
         
         {item.weight && (
           <Text style={styles.cargoInfo}>Жин: {item.weight} kg</Text>
+        )}
+
+        {item.price && (
+          <Text style={styles.cargoInfo}>Үнэ: {item.price} ₮</Text>
         )}
         
         <Text style={styles.date}>
@@ -242,6 +251,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
     fontWeight: '600',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   address: {
     fontSize: 12,
