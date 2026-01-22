@@ -110,6 +110,11 @@ export const ordersService = {
     const response = await api.get('/orders/next-order-number');
     return response.data;
   },
+
+  updateOrder: async (orderId, updates) => {
+    const response = await api.put(`/orders/${orderId}`, updates);
+    return response.data;
+  },
   
   createOrder: async (order) => {
     const response = await api.post('/orders', order);
@@ -118,6 +123,11 @@ export const ordersService = {
   
   updateStatus: async (orderId, status) => {
     const response = await api.put(`/orders/${orderId}/status`, { status });
+    return response.data;
+  },
+
+  getOrderHistory: async (orderId) => {
+    const response = await api.get(`/orders/${orderId}/history`);
     return response.data;
   }
 };
