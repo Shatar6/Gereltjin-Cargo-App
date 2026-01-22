@@ -1,19 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Modal } from 'react-native';
-import { Text, Button, Card, ListItem, Overlay } from 'react-native-elements';
+import { Text, Button, Card, ListItem, Overlay, Divider } from 'react-native-elements';
 import { ordersService } from '../services/api';
+import * as SecureStore from 'expo-secure-store';
 
 export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) => {
   const [updating, setUpdating] = useState(false);
+  const [userRole, setUserRole] = useState('worker');
+
+  useEffect(() => {
+    loadUserRole();
+  }, [])
+
+  const loadUserRole = async () => {
+    try {
+      const userData = await SecureStore.getItemAsync('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        setUserRole(user.role || 'worker');
+      }
+    } catch (error) {
+      console.error('Error loading user role:', error);
+    }
+  };
 
   if (!order) return null;
 
-  const statusOptions = ['Хүлээгдэж Байгаа', 'Хүргэлтэнд Байгаа', 'Хүргэгдсэн', 'Цуцлагдсан'];
+  const getStatusOptions = () => {
+    if (userRole === 'executive') {
+      // Executives can set any status
+      return [
+        { value: 'received_package', label: 'Хүлээж Авсан' },
+        { value: 'payment_feed', label: 'Төлбөр Төлсөн' },
+        { value: 'delivered', label: 'Хүргэгдсэн' },
+        { value: 'canceled', label: 'Цуцлагдсан' }
+      ];
+    } else {
+      // Workers can only set to payment_feed if current status is received_package
+      if (order.status === 'received_package') {
+        return [
+          { value: 'payment_feed', label: 'Төлбөр Төлсөн' }
+        ];
+      }
+      return []; // No options if already payment_feed or beyond
+    }
+  };
+
+  const statusOptions = getStatusOptions();
 
   const handleStatusUpdate = async (newStatus) => {
     Alert.alert(
       'Төлөв Шинчлэх',
-      `Change status to ${newStatus}?`,
+      `Төлвийг "${getStatusLabel(newStatus)}" болгох уу?`,
       [
         { text: 'Цуцлах', style: 'cancel' },
         {
@@ -21,7 +59,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           onPress: async () => {
             setUpdating(true);
             try {
-              await ordersService.updateStatus(order.id, newStatus);
+              await ordersService.updateOrder(order.id, { status: newStatus });
               Alert.alert('Амжилттай', 'Мэдээллийг Амжилттай Шинчиллээ');
               onStatusUpdate(); // Refresh the list
               onClose();
@@ -37,12 +75,32 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
   };
 
   const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'Хүлээгдэж Байгаа': return '#FFA500';
-      case 'Хүргэлтэнд Байгаа': return '#2196F3';
-      case 'Хүргэгдсэн': return '#4CAF50';
-      case 'Цуцлагдсан': return '#F44336';
-      default: return '#757575';
+    switch (status) {
+      case 'received_package': 
+        return '#2196F3'; // Blue
+      case 'payment_feed': 
+        return '#FF9800'; // Orange
+      case 'delivered': 
+        return '#4CAF50'; // Green
+      case 'canceled':
+        return '#F44336'; // Red
+      default: 
+        return '#757575'; // Gray
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'received_package': 
+        return 'Хүлээж Авсан';
+      case 'payment_feed': 
+        return 'Төлбөр Төлсөн';
+      case 'delivered': 
+        return 'Хүргэгдсэн';
+      case 'canceled':
+        return 'Цуцлагдсан';
+      default: 
+        return status;
     }
   };
 
@@ -66,15 +124,15 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           </View>
           
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) }]}>
-            <Text style={styles.statusText}>{order.status?.toUpperCase()}</Text>
+            <Text style={styles.statusText}>{getStatusLabel(order.status)}</Text>
           </View>
         </Card>
 
         <Card>
-          <Text style={styles.sectionTitle}>Үйлчлүүлэгчийн Мэдээлэл</Text>
+          <Text style={styles.sectionTitle}>Илгээгчийн Мэдээлэл</Text>
           <ListItem>
             <ListItem.Content>
-              <ListItem.Title>Нэр</ListItem.Title>
+              <ListItem.Title>Нэр:</ListItem.Title>
               <ListItem.Subtitle>{order.customer_name}</ListItem.Subtitle>
             </ListItem.Content>
           </ListItem>
@@ -82,8 +140,29 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           {order.customer_phone && (
             <ListItem>
               <ListItem.Content>
-                <ListItem.Title>Утасны Дугаар</ListItem.Title>
+                <ListItem.Title>Утасны Дугаар:</ListItem.Title>
                 <ListItem.Subtitle>{order.customer_phone}</ListItem.Subtitle>
+              </ListItem.Content>
+            </ListItem>
+          )}
+        </Card>
+
+        <Card>
+          <Text style={styles.sectionTitle}>Хүлээн Авагчийн Мэдээлэл</Text>
+          {order.receiver_name && (
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title>Нэр:</ListItem.Title>
+                <ListItem.Subtitle>{order.receiver_name}</ListItem.Subtitle>
+              </ListItem.Content>
+            </ListItem>
+          )}
+          
+          {order.receiver_phone && (
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title>Утасны Дугаар:</ListItem.Title>
+                <ListItem.Subtitle>{order.receiver_phone}</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
           )}
@@ -93,11 +172,10 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           <Text style={styles.sectionTitle}>Хүргэлтийн Мэдээллүүд</Text>
           <ListItem>
             <ListItem.Content>
-              <ListItem.Title>Хүлээн Авсан Хаяг</ListItem.Title>
+              <ListItem.Title>Хүлээн Авсан Хаяг:</ListItem.Title>
               <ListItem.Subtitle>{order.pickup_address}</ListItem.Subtitle>
             </ListItem.Content>
           </ListItem>
-          
         </Card>
 
         <Card>
@@ -105,7 +183,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           {order.cargo_type && (
             <ListItem>
               <ListItem.Content>
-                <ListItem.Title>Төрөл</ListItem.Title>
+                <ListItem.Title>Төрөл:</ListItem.Title>
                 <ListItem.Subtitle>{order.cargo_type}</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
@@ -114,8 +192,17 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           {order.weight && (
             <ListItem>
               <ListItem.Content>
-                <ListItem.Title>Жин</ListItem.Title>
+                <ListItem.Title>Жин:</ListItem.Title>
                 <ListItem.Subtitle>{order.weight} kg</ListItem.Subtitle>
+              </ListItem.Content>
+            </ListItem>
+          )}
+
+          {order.price && (
+            <ListItem>
+              <ListItem.Content>
+                <ListItem.Title>Үнэ:</ListItem.Title>
+                <ListItem.Subtitle>{order.price} ₮</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
           )}
@@ -123,31 +210,41 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           {order.notes && (
             <ListItem>
               <ListItem.Content>
-                <ListItem.Title>Нэмэлт Тэмдэглэл</ListItem.Title>
+                <ListItem.Title>Нэмэлт Тэмдэглэл:</ListItem.Title>
                 <ListItem.Subtitle>{order.notes}</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
           )}
         </Card>
+        
+        {statusOptions.length > 0 && (
+          <Card>
+            <Text style={styles.sectionTitle}>Төлөв Шинчлэх</Text>
+            <View style={styles.statusButtons}>
+              {statusOptions.map((status) => (
+                <Button
+                  key={status}
+                  title={status.label.toUpperCase()}
+                  onPress={() => handleStatusUpdate(status.value)}
+                  disabled={order.status === status || updating}
+                  buttonStyle={[
+                    styles.statusButton,
+                    { backgroundColor: getStatusColor(status.value) },
+                    order.status === status.value && styles.activeStatus
+                  ]}
+                />
+              ))}
+            </View>
+          </Card>
+        )}
 
-        <Card>
-          <Text style={styles.sectionTitle}>Төлөв Шинчлэх</Text>
-          <View style={styles.statusButtons}>
-            {statusOptions.map((status) => (
-              <Button
-                key={status}
-                title={status.toUpperCase()}
-                onPress={() => handleStatusUpdate(status)}
-                disabled={order.status === status || updating}
-                buttonStyle={[
-                  styles.statusButton,
-                  { backgroundColor: getStatusColor(status) },
-                  order.status === status && styles.activeStatus
-                ]}
-              />
-            ))}
-          </View>
-        </Card>
+        {statusOptions.length === 0 && userRole !== 'executive' && (
+          <Card>
+            <Text style={styles.infoText}>
+              Зөвхөн удирдлага төлвийг өөрчлөх боломжтой
+            </Text>
+          </Card>
+        )}
 
         <Card>
           <Text style={styles.timestamp}>
@@ -159,6 +256,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
             </Text>
           )}
         </Card>
+        <Divider margin={20} />
       </ScrollView>
     </Overlay>
   );
@@ -166,11 +264,11 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
 
 const styles = StyleSheet.create({
   overlay: {
-    padding: 0,
+    padding: 5,
     margin: 0,
   },
   headerCard: {
-    marginTop: 40,
+    marginTop: 70,
   },
   header: {
     flexDirection: 'row',
@@ -205,7 +303,7 @@ const styles = StyleSheet.create({
   },
   statusButton: {
     marginVertical: 5,
-    width: '48%',
+    width: '60%',
   },
   activeStatus: {
     opacity: 0.6,

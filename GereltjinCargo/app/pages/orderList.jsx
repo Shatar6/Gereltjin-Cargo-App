@@ -69,11 +69,33 @@ export const OrdersListScreen = ({ navigation }) => {
   };
 
   const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'pending': return '#FFA500';
-      case 'in-transit': return '#2196F3';
-      case 'delivered': return '#4CAF50';
-      default: return '#757575';
+    switch (status) {
+      case 'received_package': 
+        return '#2196F3'; // Blue
+      case 'payment_paid': 
+        return '#FF9800'; // Orange
+      case 'delivered': 
+        return '#4CAF50'; // Green
+      case 'canceled':
+        return '#F44336'; // Red
+      default: 
+        return '#757575'; // Gray
+    }
+  };
+
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'received_package': 
+        return 'Хүлээж Авсан';
+      case 'payment_paid': 
+        return 'Төлбөр Төлсөн';
+      case 'delivered': 
+        return 'Хүргэгдсэн';
+      case 'canceled':
+        return 'Цуцлагдсан';
+      default: 
+        return status;
     }
   };
 
