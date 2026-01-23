@@ -7,11 +7,11 @@ import * as SecureStore from 'expo-secure-store';
 export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) => {
   const [updating, setUpdating] = useState(false);
   const [userRole, setUserRole] = useState('worker');
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
-  useEffect(() => {
-    loadUserRole();
-  }, [])
-
+  
   const loadUserRole = async () => {
     try {
       const userData = await SecureStore.getItemAsync('user');
@@ -22,9 +22,34 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
     } catch (error) {
       console.error('Error loading user role:', error);
     }
+  }; 
+
+  useEffect(() => {
+    loadUserRole();
+  }, [])
+
+  useEffect(() => {
+    if (visible && order && userRole === 'executive') {
+      loadOrderHistory();
+    }
+  }, [visible, order, userRole]);
+  
+  const loadOrderHistory = async () => {
+    if (!order) return;
+    
+    setLoadingHistory(true);
+    try {
+      const history = await ordersService.getOrderHistory(order.id);
+      setOrderHistory(history);
+    } catch (error) {
+      console.error('Error loading order history:', error);
+    } finally {
+      setLoadingHistory(false);
+    }
   };
 
   if (!order) return null;
+
 
   const getStatusOptions = () => {
     if (userRole === 'executive') {
@@ -104,6 +129,16 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
     }
   };
 
+  const getActionLabel = (action) => {
+    switch (action) {
+      case 'created': return 'Үүсгэсэн';
+      case 'status_changed': return 'Төлөв өөрчилсөн';
+      case 'updated': return 'Шинчилсэн';
+      default: return action;
+    }
+  };
+
+
   return (
     <Overlay
       isVisible={visible}
@@ -127,21 +162,19 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
             <Text style={styles.statusText}>{getStatusLabel(order.status)}</Text>
           </View>
         </Card>
-
+        {/* Sender Information */}
         <Card>
           <Text style={styles.sectionTitle}>Илгээгчийн Мэдээлэл</Text>
-          <ListItem>
+          <ListItem key="sender-name">
             <ListItem.Content>
-              <ListItem.Title>Нэр:</ListItem.Title>
-              <ListItem.Subtitle>{order.customer_name}</ListItem.Subtitle>
+              <ListItem.Title>Нэр: {order.customer_name}</ListItem.Title>
             </ListItem.Content>
           </ListItem>
           
           {order.customer_phone && (
-            <ListItem>
+            <ListItem key="sender-phone">
               <ListItem.Content>
-                <ListItem.Title>Утасны Дугаар:</ListItem.Title>
-                <ListItem.Subtitle>{order.customer_phone}</ListItem.Subtitle>
+                <ListItem.Title>Утасны дугаар: {order.customer_phone}</ListItem.Title>
               </ListItem.Content>
             </ListItem>
           )}
@@ -150,19 +183,17 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
         <Card>
           <Text style={styles.sectionTitle}>Хүлээн Авагчийн Мэдээлэл</Text>
           {order.receiver_name && (
-            <ListItem>
+            <ListItem key="receiver-name">
               <ListItem.Content>
-                <ListItem.Title>Нэр:</ListItem.Title>
-                <ListItem.Subtitle>{order.receiver_name}</ListItem.Subtitle>
+                <ListItem.Title>Нэр: {order.receiver_name}</ListItem.Title>
               </ListItem.Content>
             </ListItem>
           )}
           
           {order.receiver_phone && (
-            <ListItem>
+            <ListItem key="receiver-phone">
               <ListItem.Content>
-                <ListItem.Title>Утасны Дугаар:</ListItem.Title>
-                <ListItem.Subtitle>{order.receiver_phone}</ListItem.Subtitle>
+                <ListItem.Title>Утасны дугаар: {order.receiver_phone}</ListItem.Title>
               </ListItem.Content>
             </ListItem>
           )}
@@ -170,10 +201,9 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
 
         <Card>
           <Text style={styles.sectionTitle}>Хүргэлтийн Мэдээллүүд</Text>
-          <ListItem>
+          <ListItem key="pickup-address">
             <ListItem.Content>
-              <ListItem.Title>Хүлээн Авсан Хаяг:</ListItem.Title>
-              <ListItem.Subtitle>{order.pickup_address}</ListItem.Subtitle>
+              <ListItem.Title>Хүлээн авсан хаяг:   {order.pickup_address}</ListItem.Title> 
             </ListItem.Content>
           </ListItem>
         </Card>
@@ -181,7 +211,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
         <Card>
           <Text style={styles.sectionTitle}>Ачааны Мэдээлэл</Text>
           {order.cargo_type && (
-            <ListItem>
+            <ListItem key="cargo-type">
               <ListItem.Content>
                 <ListItem.Title>Төрөл:</ListItem.Title>
                 <ListItem.Subtitle>{order.cargo_type}</ListItem.Subtitle>
@@ -190,7 +220,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           )}
           
           {order.weight && (
-            <ListItem>
+            <ListItem key="weight">
               <ListItem.Content>
                 <ListItem.Title>Жин:</ListItem.Title>
                 <ListItem.Subtitle>{order.weight} kg</ListItem.Subtitle>
@@ -199,7 +229,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           )}
 
           {order.price && (
-            <ListItem>
+            <ListItem key="price">
               <ListItem.Content>
                 <ListItem.Title>Үнэ:</ListItem.Title>
                 <ListItem.Subtitle>{order.price} ₮</ListItem.Subtitle>
@@ -208,7 +238,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           )}
           
           {order.notes && (
-            <ListItem>
+            <ListItem key="notes">
               <ListItem.Content>
                 <ListItem.Title>Нэмэлт Тэмдэглэл:</ListItem.Title>
                 <ListItem.Subtitle>{order.notes}</ListItem.Subtitle>
@@ -243,6 +273,54 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
             <Text style={styles.infoText}>
               Зөвхөн удирдлага төлвийг өөрчлөх боломжтой
             </Text>
+          </Card>
+        )}
+
+         {/* Order History - Only for Executives */}
+        {userRole === 'executive' && (
+          <Card>
+            <View style={styles.historyHeader}>
+              <Text style={styles.sectionTitle}>Өөрчлөлтийн Түүх</Text>
+              <Button
+                title={showHistory ? "Нуух" : "Харах"}
+                type="clear"
+                onPress={() => setShowHistory(!showHistory)}
+                icon={
+                  <Icon
+                    name={showHistory ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                    type="material"
+                    size={20}
+                  />
+                }
+              />
+            </View>
+            
+            {showHistory && (
+              <>
+                {loadingHistory ? (
+                  <ActivityIndicator size="small" color="#2196F3" />
+                ) : orderHistory.length > 0 ? (
+                  orderHistory.map((item, index) => (
+                    <View key={item.id || index} style={styles.historyItem}>
+                      <View style={styles.historyItemHeader}>
+                        <Text style={styles.historyWorker}>{item.worker_name}</Text>
+                        <Text style={styles.historyDate}>
+                          {new Date(item.created_at).toLocaleString('mn-MN')}
+                        </Text>
+                      </View>
+                      <Text style={styles.historyAction}>{getActionLabel(item.action)}</Text>
+                      {item.old_status && item.new_status && (
+                        <Text style={styles.historyStatusChange}>
+                          {getStatusLabel(item.old_status)} → {getStatusLabel(item.new_status)}
+                        </Text>
+                      )}
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.emptyHistory}>Түүх олдсонгүй</Text>
+                )}
+              </>
+            )}
           </Card>
         )}
 
@@ -312,5 +390,47 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginTop: 5,
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  historyItem: {
+    backgroundColor: '#f5f5f5',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  historyItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  historyWorker: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#333',
+  },
+  historyDate: {
+    fontSize: 12,
+    color: '#666',
+  },
+  historyAction: {
+    fontSize: 13,
+    color: '#555',
+    marginTop: 2,
+  },
+  historyStatusChange: {
+    fontSize: 13,
+    color: '#2196F3',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+  emptyHistory: {
+    textAlign: 'center',
+    color: '#999',
+    fontStyle: 'italic',
+    marginTop: 10,
   },
 });

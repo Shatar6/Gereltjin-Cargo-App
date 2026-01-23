@@ -1,5 +1,5 @@
 import React, { useState, useEffect  } from 'react';
-import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Input, Button, Text, Card, Divider  } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -21,10 +21,24 @@ export const OrderEntryScreen = ({ navigation }) => {
   });
   const [loading, setLoading] = useState(false);
   const [photo, setPhoto] = useState(null);
+  const [cameraPermission, setCameraPermission] = useState(null);
 
   useEffect(() => {
     loadNextOrderNumber();
+    requestCameraPermission();
   }, []);
+
+  const requestCameraPermission = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    setCameraPermission(status === 'granted');
+    
+    if (status !== 'granted') {
+      Alert.alert(
+        'Зөвшөөрөл Хэрэгтэй',
+        'Камер ашиглахын тулд зөвшөөрөл өгнө үү'
+      );
+    }
+  };
 
   const loadNextOrderNumber = async () => {
     try {
@@ -41,18 +55,57 @@ export const OrderEntryScreen = ({ navigation }) => {
   };
 
   const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.5,
-      base64: true
-    });
+      const requestCameraPermission = async () => {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      setCameraPermission(status === 'granted');
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Зөвшөөрөл Хэрэгтэй',
+          'Камер ашиглахын тулд зөвшөөрөл өгнө үү'
+        );
+      }
+    }; 
 
-    if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+        base64: true
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        setPhoto(result.assets[0]);
+        Alert.alert('Амжилттай', 'Зураг амжилттай авлаа');
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert('Алдаа', 'Зураг авахад алдаа гарлаа');
     }
   };
+
+  const pickImageFromGallery = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+        base64: true
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        setPhoto(result.assets[0]);
+        Alert.alert('Амжилттай', 'Зураг амжилттай сонголоо');
+      }
+    } catch (error) {
+      console.error('Gallery error:', error);
+      Alert.alert('Алдаа', 'Зураг сонгохдоо алдаа гарлаа');
+    }
+  };
+
 
   const validateForm = () => {
     const required = [
@@ -149,14 +202,14 @@ export const OrderEntryScreen = ({ navigation }) => {
           <Text h4 style={styles.title}>Захиалгын Дугаар: {nextOrderNumber}</Text>
           <Text style={styles.sectionTitle}>Илгээгчийн Мэдээлэл</Text>
           <Input
-            placeholder="Илгээгчийн Нэр *"
+            placeholder="Нэр *"
             value={formData.customerName}
             onChangeText={(value) => handleInputChange('customerName', value)}
             leftIcon={{ type: 'material', name: 'person' }}
           />
           
           <Input
-            placeholder="Илгээгчийн Утасны Дугаар *"
+            placeholder="Утасны Дугаар *"
             value={formData.customerPhone}
             onChangeText={(value) => handleInputChange('customerPhone', value)}
             keyboardType="phone-pad"
@@ -165,14 +218,14 @@ export const OrderEntryScreen = ({ navigation }) => {
 
           <Text style={styles.sectionTitle}>Хүлээн Авагчийн Мэдээлэл</Text>
           <Input
-            placeholder="Хүлээн Авагчийн Нэр *"
+            placeholder="Нэр *"
             value={formData.receiverName}
             onChangeText={(value) => handleInputChange('receiverName', value)}
             leftIcon={{ type: 'material', name: 'person' }}
           />
           
           <Input
-            placeholder="Хүлээн Авагчийн Утасны Дугаар *"
+            placeholder="Утасны Дугаар *"
             value={formData.receiverPhone}
             onChangeText={(value) => handleInputChange('receiverPhone', value)}
             keyboardType="phone-pad"
@@ -183,7 +236,7 @@ export const OrderEntryScreen = ({ navigation }) => {
           
           <Text style={styles.sectionTitle}>Ачааны Мэдээлэл</Text>
           <Input
-            placeholder="Ачаа хүлээн авсан хаяг *"
+            placeholder="Хүлээн авсан хаяг *"
             value={formData.pickupAddress}
             onChangeText={(value) => handleInputChange('pickupAddress', value)}
             leftIcon={{ type: 'material', name: 'location-on' }}
@@ -248,15 +301,30 @@ export const OrderEntryScreen = ({ navigation }) => {
             numberOfLines={3}
           />
           
-          <Button
-            title="Ачааны Зураг Оруулах"
-            onPress={takePhoto}
-            type="outline"
-            icon={{ type: 'material', name: 'camera-alt', color: '#2196F3' }}
-            buttonStyle={styles.photoButton}
-          />
+          <View style={styles.photoSection}>
+            <Button
+              title="Камераар Зураг Авах"
+              onPress={takePhoto}
+              type="outline"
+              icon={{ type: 'material', name: 'camera-alt', color: '#2196F3' }}
+              buttonStyle={styles.photoButton}
+            />
+            
+            <Button
+              title="Зургийн Санаас Сонгох"
+              onPress={pickImageFromGallery}
+              type="outline"
+              icon={{ type: 'material', name: 'photo-library', color: '#4CAF50' }}
+              buttonStyle={[styles.photoButton, { borderColor: '#4CAF50' }]}
+            />
+          </View>
           
-          {photo && <Text style={styles.photoText}>Photo captured ✓</Text>}
+          {photo && (
+            <View style={styles.photoPreview}>
+              <Image source={{ uri: photo.uri }} style={styles.photoImage} />
+              <Text style={styles.photoText}>Зураг бэлэн ✓</Text>
+            </View>
+          )}
           
           <Button
             title="Захиалга Үүсгэх"
@@ -335,17 +403,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  photoButton: {
+  submitButton: {
+    marginTop: 20,
+    backgroundColor: '#4CAF50',
+  },
+  photoSection: {
     marginVertical: 10,
+  },
+  photoButton: {
+    marginVertical: 5,
     borderColor: '#2196F3',
+  },
+  photoPreview: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  photoImage: {
+    width: 200,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   photoText: {
     textAlign: 'center',
     color: 'green',
-    marginBottom: 10,
-  },
-  submitButton: {
-    marginTop: 20,
-    backgroundColor: '#4CAF50',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

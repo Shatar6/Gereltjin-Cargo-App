@@ -95,6 +95,12 @@ export const authService = {
     const token = await SecureStore.getItemAsync('token');
     console.log('Retrieved token:', !!token);
     return token;
+  },
+
+  verifyToken: async () => {
+    // This will fail if token is invalid, triggering the 401 interceptor
+    const response = await api.get('/orders/next-order-number');
+    return response.data;
   }
 };
 

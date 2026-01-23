@@ -106,6 +106,7 @@ export const OrdersListScreen = ({ navigation }) => {
             setSelectedOrder(item);
             setDetailModalVisible(true);
         }}>
+          
       <ListItem.Content>
         <View style={styles.orderHeader}>
           <ListItem.Title style={styles.orderNumber}>
@@ -117,16 +118,14 @@ export const OrdersListScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.orderHeader}>
-          <ListItem.Subtitle>
-            <Text style={styles.customerName}>Илгээгч: {item.customer_name}</Text>
-          </ListItem.Subtitle>
-              {item.receiver_name && (
-                <Text style={styles.customerName}>Хүлээн авагч: {item.receiver_name}</Text>
-              )}
+          <Text style={styles.customerName}>Илгээгч: {item.customer_name}</Text>
+          {item.receiver_name && (
+            <Text style={styles.customerName}>Хүлээн авагч: {item.receiver_name}</Text>
+          )}
         </View>
         
         <Text style={styles.address}>Ачаа авсан хаяг: {item.pickup_address}</Text>
-        <Text style={styles.address}>Ачаа авсан ажилтан: {item.worker_id}</Text>
+        <Text style={styles.address}>Ажилтан: {item.worker_name}</Text>
 
         {item.cargo_type && (
           <Text style={styles.cargoInfo}>Төрөл: {item.cargo_type}</Text>
@@ -180,7 +179,7 @@ export const OrdersListScreen = ({ navigation }) => {
         <FlatList
           data={orders}
           renderItem={renderOrder}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
