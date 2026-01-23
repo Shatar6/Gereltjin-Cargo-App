@@ -10,6 +10,7 @@ export const OrderEntryScreen = ({ navigation }) => {
   const [showCargoOptions, setShowCargoOptions] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
+    OrderNumber: '',
     customerPhone: '',
     receiverName: '',
     receiverPhone: '',
@@ -144,11 +145,13 @@ export const OrderEntryScreen = ({ navigation }) => {
     if (!validateForm()) {
       return;
     }
+    console.log("Submitting order with data:", formData);
 
     setLoading(true);
     try {
       const orderData = {
         customerName: formData.customerName,
+        OrderNumber: nextOrderNumber,
         customerPhone: formData.customerPhone,
         receiverName: formData.receiverName,
         receiverPhone: formData.receiverPhone,
@@ -165,6 +168,7 @@ export const OrderEntryScreen = ({ navigation }) => {
         { text: 'OK', onPress: () => {
           setFormData({
             customerName: '',
+            OrderNumber: '',
             customerPhone: '',
             receiverName: '',
             receiverPhone: '',
@@ -311,7 +315,7 @@ export const OrderEntryScreen = ({ navigation }) => {
             />
             
             <Button
-              title="Зургийн Санаас Сонгох"
+              title="Зураг Сонгох"
               onPress={pickImageFromGallery}
               type="outline"
               icon={{ type: 'material', name: 'photo-library', color: '#4CAF50' }}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Modal } from 'react-native';
-import { Text, Button, Card, ListItem, Overlay, Divider } from 'react-native-elements';
+import { View, StyleSheet, ScrollView, Alert, Modal, ActivityIndicator  } from 'react-native';
+import { Text, Button, Card, ListItem, Overlay, Divider , Icon} from 'react-native-elements';
 import { ordersService } from '../services/api';
 import * as SecureStore from 'expo-secure-store';
 
@@ -56,18 +56,18 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
       // Executives can set any status
       return [
         { value: 'received_package', label: 'Хүлээж Авсан' },
-        { value: 'payment_feed', label: 'Төлбөр Төлсөн' },
+        { value: 'payment_paid', label: 'Төлбөр Төлсөн' },
         { value: 'delivered', label: 'Хүргэгдсэн' },
-        { value: 'canceled', label: 'Цуцлагдсан' }
+        { value: 'cancelled', label: 'Цуцлагдсан' }
       ];
     } else {
-      // Workers can only set to payment_feed if current status is received_package
+      // Workers can only set to payment_paid if current status is received_package
       if (order.status === 'received_package') {
         return [
-          { value: 'payment_feed', label: 'Төлбөр Төлсөн' }
+          { value: 'payment_paid', label: 'Төлбөр Төлсөн' }
         ];
       }
-      return []; // No options if already payment_feed or beyond
+      return []; // No options if already payment_paid or beyond
     }
   };
 
@@ -84,6 +84,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           onPress: async () => {
             setUpdating(true);
             try {
+              console.log("Updating order", order.id, "to status", newStatus);
               await ordersService.updateOrder(order.id, { status: newStatus });
               Alert.alert('Амжилттай', 'Мэдээллийг Амжилттай Шинчиллээ');
               onStatusUpdate(); // Refresh the list
@@ -103,7 +104,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
     switch (status) {
       case 'received_package': 
         return '#2196F3'; // Blue
-      case 'payment_feed': 
+      case 'payment_paid': 
         return '#FF9800'; // Orange
       case 'delivered': 
         return '#4CAF50'; // Green
@@ -118,11 +119,11 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
     switch (status) {
       case 'received_package': 
         return 'Хүлээж Авсан';
-      case 'payment_feed': 
+      case 'payment_paid': 
         return 'Төлбөр Төлсөн';
       case 'delivered': 
         return 'Хүргэгдсэн';
-      case 'canceled':
+      case 'cancelled':
         return 'Цуцлагдсан';
       default: 
         return status;
@@ -133,7 +134,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
     switch (action) {
       case 'created': return 'Үүсгэсэн';
       case 'status_changed': return 'Төлөв өөрчилсөн';
-      case 'updated': return 'Шинчилсэн';
+      case 'updated': return 'Шинэчилсэн';
       default: return action;
     }
   };
@@ -152,7 +153,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
             <Text h4>{order.order_number}</Text>
             <Button
               title="✕"
-              type="арилгах"
+              type="clear"
               onPress={onClose}
               titleStyle={styles.closeButton}
             />
@@ -253,7 +254,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
             <View style={styles.statusButtons}>
               {statusOptions.map((status) => (
                 <Button
-                  key={status}
+                  key={status.value}
                   title={status.label.toUpperCase()}
                   onPress={() => handleStatusUpdate(status.value)}
                   disabled={order.status === status || updating}

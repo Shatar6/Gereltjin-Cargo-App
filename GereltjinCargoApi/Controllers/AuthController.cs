@@ -33,8 +33,6 @@ namespace GereltjinCargoApi.Controllers
                 new { request.Email }
             );
             
-            Console.WriteLine($"Worker Role Retrieved: {worker}");
-
             if (worker == null || !BCrypt.Net.BCrypt.Verify(request.Password, worker.password_hash))
                 return Unauthorized(new { message = "Invalid credentials" });
             
@@ -45,7 +43,8 @@ namespace GereltjinCargoApi.Controllers
                 Token = token, 
                 Email = worker.email, 
                 UserId = worker.id,
-                Name = worker.name
+                Name = worker.name,
+                Role = worker.role
             });
         }
 

@@ -76,7 +76,6 @@ api.interceptors.response.use(
 // Auth services
 export const authService = {
   login: async (email, password) => {
-    console.log("Trying to login with", email, password);
     const response = await api.post('/auth/login', { email, password });
     if (response.data.token) {
       await SecureStore.setItemAsync('token', response.data.token);
@@ -118,6 +117,7 @@ export const ordersService = {
   },
 
   updateOrder: async (orderId, updates) => {
+    console.log("API updating order", orderId, "with", updates);
     const response = await api.put(`/orders/${orderId}`, updates);
     return response.data;
   },

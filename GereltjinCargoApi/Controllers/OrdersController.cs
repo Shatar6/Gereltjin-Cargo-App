@@ -43,13 +43,17 @@ namespace GereltjinCargoApi.Controllers
                 ? name.Substring(0, 2).ToUpper() 
                 : name.ToUpper().PadRight(2, 'X');
 
+            var koreaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Korea Standard Time");
+            var todayKst = TimeZoneInfo.ConvertTime(DateTime.UtcNow, koreaTimeZone).Date;
+
             // Get today's date
-            var today = DateTime.Now;
+            var today = todayKst;
             var dateStr = today.ToString("yy-MM-dd");
 
             // Get count of today's orders for this worker
             var startOfDay = today.Date;
             var endOfDay = today.Date.AddDays(1);
+            
             
             var todayCount = await connection.QuerySingleAsync<int>(
                 @"SELECT COUNT(*) FROM orders 
@@ -75,8 +79,6 @@ namespace GereltjinCargoApi.Controllers
             using var connection = _supabaseService.GetConnection();
 
             var (userId, userRole, _) = GetCurrentUser();
-
-            Console.WriteLine($"User Role: {userRole}");
 
             string query;
             object parameters;
@@ -201,32 +203,32 @@ namespace GereltjinCargoApi.Controllers
             );
 
             // Generate order number
-            string name = worker?.name ?? "XX";
-            string initials = name.Length >= 2 
-                ? name.Substring(0, 2).ToUpper() 
-                : name.ToUpper().PadRight(2, 'X');
+            // string name = worker?.name ?? "XX";
+            // string initials = name.Length >= 2 
+            //     ? name.Substring(0, 2).ToUpper() 
+            //     : name.ToUpper().PadRight(2, 'X');
 
-            var today = DateTime.Now;
-            var dateStr = today.ToString("yy-MM-dd");
+            // var today = DateTime.Now;
+            // var dateStr = today.ToString("yy-MM-dd");
             
-            // Get today's count for this worker
-            var startOfDay = today.Date;
-            var endOfDay = today.Date.AddDays(1);
+            // // Get today's count for this worker
+            // var startOfDay = today.Date;
+            // var endOfDay = today.Date.AddDays(1);
             
-            var todayCount = await connection.QuerySingleAsync<int>(
-                @"SELECT COUNT(*) FROM orders 
-                  WHERE worker_id = @WorkerId 
-                  AND created_at >= @StartOfDay 
-                  AND created_at < @EndOfDay",
-                new { 
-                    WorkerId = userId, 
-                    StartOfDay = startOfDay, 
-                    EndOfDay = endOfDay 
-                }
-            );
+            // var todayCount = await connection.QuerySingleAsync<int>(
+            //     @"SELECT COUNT(*) FROM orders 
+            //       WHERE worker_id = @WorkerId 
+            //       AND created_at >= @StartOfDay 
+            //       AND created_at < @EndOfDay",
+            //     new { 
+            //         WorkerId = userId, 
+            //         StartOfDay = startOfDay, 
+            //         EndOfDay = endOfDay 
+            //     }
+            // );
 
-            var orderNumber = $"{initials}-{dateStr}-{(todayCount + 1):D3}";
-
+            // var orderNumber = $"{initials}-{dateStr}-{(todayCount + 1):D3}";
+            var orderNumber = request.OrderNumber;
             // Handle photo upload if present
             string? photoUrl = null;
             if (!string.IsNullOrEmpty(request.PhotoBase64))
@@ -302,7 +304,7 @@ namespace GereltjinCargoApi.Controllers
             // Status update with authorization check
             if (!string.IsNullOrEmpty(request.Status) && request.Status != order.status)
             {
-                var validStatuses = new[] { "received_package", "payment_feed", "delivered", "canceled" };
+                var validStatuses = new[] { "received_package", "payment_paid", "delivered", "cancelled" };
                 
                 if (!validStatuses.Contains(request.Status))
                 {
@@ -540,6 +542,7 @@ namespace GereltjinCargoApi.Controllers
     public class CreateOrderRequest
     {
         public string CustomerName { get; set; } = string.Empty;
+        public string OrderNumber { get; set; } = string.Empty;
         public string? CustomerPhone { get; set; }
         public string PickupAddress { get; set; } = string.Empty;
         public string DeliveryAddress { get; set; } = string.Empty;
