@@ -179,7 +179,7 @@ export const OrdersListScreen = ({ navigation }) => {
         <FlatList
           data={orders}
           renderItem={renderOrder}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }

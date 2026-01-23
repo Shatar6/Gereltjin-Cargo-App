@@ -72,7 +72,7 @@ export const OrderEntryScreen = ({ navigation }) => {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [3, 4] ,
         quality: 0.5,
         base64: true
       });
@@ -92,7 +92,7 @@ export const OrderEntryScreen = ({ navigation }) => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [3,4],
         quality: 0.5,
         base64: true
       });
@@ -423,8 +423,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   photoImage: {
-    width: 200,
-    height: 150,
+    width: 150,
+    height: 200,
     borderRadius: 10,
     marginBottom: 10,
   },
