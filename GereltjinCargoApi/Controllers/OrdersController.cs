@@ -76,6 +76,8 @@ namespace GereltjinCargoApi.Controllers
 
             var (userId, userRole, _) = GetCurrentUser();
 
+            Console.WriteLine($"User Role: {userRole}");
+
             string query;
             object parameters;
 

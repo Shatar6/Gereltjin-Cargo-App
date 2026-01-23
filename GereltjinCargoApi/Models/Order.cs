@@ -19,6 +19,7 @@ namespace GereltjinCargoApi.Models
         public decimal? price { get; set; }
         public string receiver_name { get; set; }
         public string receiver_phone { get; set; }
+        public string? worker_name { get; set; }
 
         public Worker Worker { get; set; }
         public ICollection<OrderHistory> History { get; set; }

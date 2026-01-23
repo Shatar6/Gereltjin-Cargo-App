@@ -29,14 +29,16 @@ namespace GereltjinCargoApi.Controllers
             using var connection = _supabaseService.GetConnection();
             
             var worker = await connection.QuerySingleOrDefaultAsync<dynamic>(
-                "SELECT id, email, password_hash, name FROM workers WHERE email = @Email",
+                "SELECT id, email, password_hash, name, role FROM workers WHERE email = @Email",
                 new { request.Email }
             );
+            
+            Console.WriteLine($"Worker Role Retrieved: {worker}");
 
             if (worker == null || !BCrypt.Net.BCrypt.Verify(request.Password, worker.password_hash))
                 return Unauthorized(new { message = "Invalid credentials" });
-
-            var token = GenerateJwtToken((Guid)worker.id, worker.email);
+            
+            var token = GenerateJwtToken((Guid)worker.id, worker.email, worker.role);
             
             return Ok(new LoginResponse 
             { 
@@ -47,7 +49,7 @@ namespace GereltjinCargoApi.Controllers
             });
         }
 
-        private string GenerateJwtToken(Guid userId, string email)
+        private string GenerateJwtToken(Guid userId, string email, string role)
         {
             // Use Supabase:JwtSecret from your secrets
             var jwtSecret = _configuration["Supabase:JwtSecret"] 
@@ -59,6 +61,7 @@ namespace GereltjinCargoApi.Controllers
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Role, role),
                 new Claim(ClaimTypes.Email, email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
