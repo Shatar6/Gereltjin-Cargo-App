@@ -123,8 +123,8 @@ export const OrdersListScreen = ({ navigation }) => {
             <Text style={styles.customerName}>Хүлээн авагч: {item.receiver_name}</Text>
           )}
         </View>
-        
-        <Text style={styles.address}>Ачаа авсан хаяг: {item.pickup_address}</Text>
+{/*         
+        <Text style={styles.address}>Ачаа авсан хаяг: {item.pickup_address}</Text> */}
         <Text style={styles.address}>Ажилтан: {item.worker_name}</Text>
 
         {item.cargo_type && (

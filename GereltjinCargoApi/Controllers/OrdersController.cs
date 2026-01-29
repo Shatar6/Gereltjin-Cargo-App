@@ -244,7 +244,7 @@ namespace GereltjinCargoApi.Controllers
                 order_number = orderNumber,
                 customer_name = request.CustomerName,
                 customer_phone = request.CustomerPhone,
-                pickup_address = request.PickupAddress,
+                //pickup_address = request.PickupAddress,
                 cargo_type = request.CargoType,
                 weight = request.Weight,
                 price = request.Price,
@@ -260,14 +260,13 @@ namespace GereltjinCargoApi.Controllers
 
             await connection.ExecuteAsync(@"
                 INSERT INTO orders (
-                    id, order_number, customer_name, customer_phone,
-                    pickup_address, cargo_type, weight, price, 
+                    id, order_number, customer_name, customer_phone, cargo_type, weight, price, 
                     receiver_name, receiver_phone,
                      status, worker_id, notes, photo_url,
                     created_at, updated_at
                 ) VALUES (
                     @id, @order_number, @customer_name, @customer_phone,
-                    @pickup_address,  @cargo_type, @weight, @price, 
+                     @cargo_type, @weight, @price, 
                     @receiver_name, @receiver_phone,
                      @status, @worker_id, @notes, @photo_url,
                     @created_at, @updated_at
@@ -373,11 +372,11 @@ namespace GereltjinCargoApi.Controllers
                     order.weight = request.Weight;
                 }
 
-                if (!string.IsNullOrEmpty(request.PickupAddress) && request.PickupAddress != order.pickup_address)
-                {
-                    changes["pickupAddress"] = new { from = order.pickup_address, to = request.PickupAddress };
-                    order.pickup_address = request.PickupAddress;
-                }
+                // if (!string.IsNullOrEmpty(request.PickupAddress) && request.PickupAddress != order.pickup_address)
+                // {
+                //     changes["pickupAddress"] = new { from = order.pickup_address, to = request.PickupAddress };
+                //     order.pickup_address = request.PickupAddress;
+                // }
 
                 if (request.Price.HasValue && request.Price != order.price)
                 {
@@ -425,7 +424,6 @@ namespace GereltjinCargoApi.Controllers
                     customer_phone = @customer_phone,
                     cargo_type = @cargo_type,
                     weight = @weight,
-                    pickup_address = @pickup_address,
                     worker_id = @worker_id,
                     updated_at = @updated_at
                 WHERE id = @id",
@@ -544,7 +542,7 @@ namespace GereltjinCargoApi.Controllers
         public string CustomerName { get; set; } = string.Empty;
         public string OrderNumber { get; set; } = string.Empty;
         public string? CustomerPhone { get; set; }
-        public string PickupAddress { get; set; } = string.Empty;
+        //public string PickupAddress { get; set; } = string.Empty;
         public string DeliveryAddress { get; set; } = string.Empty;
         public string? CargoType { get; set; }
         public decimal? Weight { get; set; }
@@ -567,7 +565,7 @@ namespace GereltjinCargoApi.Controllers
         public string? CustomerPhone { get; set; }
         public string? CargoType { get; set; }
         public decimal? Weight { get; set; }
-        public string? PickupAddress { get; set; }
+        //public string? PickupAddress { get; set; }
         public Guid? WorkerId { get; set; }
     }
 

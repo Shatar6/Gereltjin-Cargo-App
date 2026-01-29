@@ -6,7 +6,6 @@ namespace GereltjinCargoApi.Models
         public string order_number { get; set; } = string.Empty;
         public string customer_name { get; set; } = string.Empty;
         public string? customer_phone { get; set; }
-        public string pickup_address { get; set; } = string.Empty;
         public string? cargo_type { get; set; }
         public decimal? weight { get; set; }
         public string status { get; set; } = "Хүлээгдэж байна";

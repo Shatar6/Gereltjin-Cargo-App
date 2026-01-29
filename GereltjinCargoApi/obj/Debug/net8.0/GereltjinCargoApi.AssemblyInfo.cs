@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GereltjinCargoApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+34a3904ff955b660fa20c3ce3b8e986d375a88ae")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dac42bf3234f7927dafb758712738eceae3ef0c3")]
 [assembly: System.Reflection.AssemblyProductAttribute("GereltjinCargoApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GereltjinCargoApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
