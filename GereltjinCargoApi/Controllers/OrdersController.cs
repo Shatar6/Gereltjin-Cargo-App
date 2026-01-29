@@ -32,45 +32,99 @@ namespace GereltjinCargoApi.Controllers
             // Get current user info
             var (userId, _, _) = GetCurrentUser();
             var worker = await connection.QuerySingleOrDefaultAsync<dynamic>(
-                "SELECT name FROM workers WHERE id = @Id",
+                "SELECT name, worker_code  FROM workers WHERE id = @Id",
                 new { Id = userId }
             );
 
             if (worker == null)
                 return BadRequest(new { message = "Worker not found" });
+            
+            Console.WriteLine($"Worker Code: {worker}");
 
-            // Generate initials (first 2 letters of name)
-            string name = worker.name ?? "XX";
-            string initials = name.Length >= 2 
-                ? name.Substring(0, 2).ToUpper() 
-                : name.ToUpper().PadRight(2, 'X');
+            string workerCode = worker.worker_code; // e.g., "HS12"
 
-            var koreaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Korea Standard Time");
-            var todayKst = TimeZoneInfo.ConvertTime(DateTime.UtcNow, koreaTimeZone).Date;
+            // // Generate initials (first 2 letters of name)
+            // string name = worker.name ?? "XX";
+            // string initials = name.Length >= 2 
+            //     ? name.Substring(0, 2).ToUpper() 
+            //     : name.ToUpper().PadRight(2, 'X');
 
-            // Get today's date
-            var today = todayKst;
-            var dateStr = today.ToString("yy-MM-dd");
+            // var koreaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Korea Standard Time");
+            // var todayKst = TimeZoneInfo.ConvertTime(DateTime.UtcNow, koreaTimeZone).Date;
 
-            // Get count of today's orders for this worker
-            var startOfDay = today.Date;
-            var endOfDay = today.Date.AddDays(1);
+            // // Get today's date
+            // var today = todayKst;
+            // var dateStr = today.ToString("yy-MM-dd");
+
+            // // Get count of today's orders for this worker
+            // var startOfDay = today.Date;
+            // var endOfDay = today.Date.AddDays(1);
             
             
-            var todayCount = await connection.QuerySingleAsync<int>(
-                @"SELECT COUNT(*) FROM orders 
-                  WHERE worker_id = @WorkerId 
-                  AND created_at >= @StartOfDay 
-                  AND created_at < @EndOfDay",
+            // var todayCount = await connection.QuerySingleAsync<int>(
+            //     @"SELECT COUNT(*) FROM orders 
+            //       WHERE worker_id = @WorkerId 
+            //       AND created_at >= @StartOfDay 
+            //       AND created_at < @EndOfDay",
+            //     new { 
+            //         WorkerId = userId, 
+            //         StartOfDay = startOfDay, 
+            //         EndOfDay = endOfDay 
+            //     }
+            // );
+
+            // Generate order number: JO-26-01-02-003
+            // var orderNumber = $"{initials}-{dateStr}-{(todayCount + 1):D3}";
+
+
+            // Extract the letter prefix and starting number
+            string prefix = new string(workerCode.Where(char.IsLetter).ToArray()); // "HS"
+            string numberPart = new string(workerCode.Where(char.IsDigit).ToArray()); // "12"
+            
+            if (!int.TryParse(numberPart, out int startingNumber))
+            {
+                return BadRequest(new { message = "Invalid worker code format. Expected format: XX##" });
+            }
+
+            // Get the last order number for this worker
+            var lastOrder = await connection.QuerySingleOrDefaultAsync<string>(
+                @"SELECT order_number FROM orders 
+                WHERE worker_id = @WorkerId 
+                AND order_number LIKE @CodePattern
+                ORDER BY created_at DESC 
+                LIMIT 1",
                 new { 
-                    WorkerId = userId, 
-                    StartOfDay = startOfDay, 
-                    EndOfDay = endOfDay 
+                    WorkerId = userId,
+                    CodePattern = $"{prefix}%"
                 }
             );
 
-            // Generate order number: JO-26-01-02-003
-            var orderNumber = $"{initials}-{dateStr}-{(todayCount + 1):D3}";
+            int nextNumber;
+            if (lastOrder != null)
+            {
+                // Extract number from last order (e.g., "HS13" -> "13")
+                string lastNumberStr = new string(lastOrder.Where(char.IsDigit).ToArray());
+                
+                if (int.TryParse(lastNumberStr, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1; // HS13 → HS14
+                }
+                else
+                {
+                    // Fallback to starting number if parsing fails
+                    nextNumber = startingNumber;
+                }
+            }
+            else
+            {
+                // First order for this worker, use their starting number
+                nextNumber = startingNumber;
+            }
+
+            // Generate order number with same digit count as worker code
+            int digitCount = numberPart.Length;
+            string formatString = new string('0', digitCount); // "00" for 2 digits
+            var orderNumber = $"{prefix}{nextNumber.ToString(formatString)}";
 
             return Ok(new { orderNumber });
         }
@@ -200,7 +254,7 @@ namespace GereltjinCargoApi.Controllers
             // Get current user ID and info
             //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var worker = await connection.QuerySingleOrDefaultAsync<dynamic>(
-                "SELECT name FROM workers WHERE id = @Id",
+                "SELECT name, worker_code FROM workers WHERE id = @Id",
                 new { Id = userId}
             );
 
@@ -232,7 +286,47 @@ namespace GereltjinCargoApi.Controllers
             // );
 
             // var orderNumber = $"{initials}-{dateStr}-{(todayCount + 1):D3}";
-            var orderNumber = request.OrderNumber;
+            // var orderNumber = request.OrderNumber;
+            string workerCode = worker.worker_code;
+
+    
+            // Extract prefix and number
+            string prefix = new string(workerCode.Where(char.IsLetter).ToArray());
+            string numberPart = new string(workerCode.Where(char.IsDigit).ToArray());
+            
+            if (!int.TryParse(numberPart, out int startingNumber))
+            {
+                return BadRequest(new { message = "Invalid worker code format" });
+            }
+
+            // Get last order and calculate next number
+            var lastOrder = await connection.QuerySingleOrDefaultAsync<string>(
+                @"SELECT order_number FROM orders 
+                WHERE worker_id = @WorkerId 
+                AND order_number LIKE @CodePattern
+                ORDER BY created_at DESC 
+                LIMIT 1",
+                new { 
+                    WorkerId = userId,
+                    CodePattern = $"{prefix}%"
+                }
+            );
+
+            int nextNumber;
+            if (lastOrder != null)
+            {
+                string lastNumberStr = new string(lastOrder.Where(char.IsDigit).ToArray());
+                nextNumber = int.TryParse(lastNumberStr, out int lastNumber) ? lastNumber + 1 : startingNumber;
+            }
+            else
+            {
+                nextNumber = startingNumber;
+            }
+
+            // Format with same digit count
+            int digitCount = numberPart.Length;
+            string formatString = new string('0', digitCount);
+            var orderNumber = $"{prefix}{nextNumber.ToString(formatString)}";
 
             string? photoUrl = null;
             if (!string.IsNullOrEmpty(request.PhotoBase64))
@@ -553,7 +647,7 @@ namespace GereltjinCargoApi.Controllers
     public class CreateOrderRequest
     {
         public string CustomerName { get; set; } = string.Empty;
-        public string OrderNumber { get; set; } = string.Empty;
+        //public string OrderNumber { get; set; } = string.Empty;
         public string? CustomerPhone { get; set; }
         //public string PickupAddress { get; set; } = string.Empty;
         public string DeliveryAddress { get; set; } = string.Empty;

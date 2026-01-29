@@ -29,9 +29,6 @@ namespace GereltjinCargoApi.Services
             var url = _configuration["Supabase:Url"];
             var key = _configuration["Supabase:ServiceKey"];
 
-            Console.WriteLine($"Supabase URL: {url}");
-            Console.WriteLine($"Supabase Key: {key}");
-
             if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(key))
                 throw new Exception("Supabase config missing");
             

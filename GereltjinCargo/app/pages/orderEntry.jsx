@@ -10,7 +10,7 @@ export const OrderEntryScreen = ({ navigation }) => {
   const [showCargoOptions, setShowCargoOptions] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
-    OrderNumber: '',
+    //OrderNumber: '',
     customerPhone: '',
     receiverName: '',
     receiverPhone: '',
@@ -151,7 +151,7 @@ export const OrderEntryScreen = ({ navigation }) => {
     try {
       const orderData = {
         customerName: formData.customerName,
-        OrderNumber: nextOrderNumber,
+        //OrderNumber: nextOrderNumber,
         customerPhone: formData.customerPhone,
         receiverName: formData.receiverName,
         receiverPhone: formData.receiverPhone,

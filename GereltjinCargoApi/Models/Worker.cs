@@ -8,5 +8,6 @@ namespace GereltjinCargoApi.Models
         public string Name { get; set; }
         public string Role { get; set; } = "worker"; // New field
         public DateTime CreatedAt { get; set; }
+        public string? worker_code { get; set; }
     }
 }
