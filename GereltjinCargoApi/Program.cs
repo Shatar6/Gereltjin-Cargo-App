@@ -21,8 +21,9 @@ builder.Services.AddSwaggerGen();           // Adds Swagger generator to your pr
                                             // Prepares Swagger UI so you can test endpoints in the browser
 
 
-// Register SupabaseService
+// Register SupabaseService and SupabaseStorageService for dependency injection
 builder.Services.AddSingleton<SupabaseService>();
+builder.Services.AddSingleton<SupabaseStorageService>();
 
 // Get JWT key with null check
 var jwtKey = builder.Configuration["Supabase:JwtSecret"];

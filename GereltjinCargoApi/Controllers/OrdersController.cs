@@ -14,11 +14,13 @@ namespace GereltjinCargoApi.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly SupabaseService _supabaseService;
+        private readonly SupabaseStorageService _storageService;
         private readonly IConfiguration _configuration;
         
-        public OrdersController(SupabaseService supabaseService, IConfiguration configuration)
+        public OrdersController(SupabaseService supabaseService, SupabaseStorageService storageService, IConfiguration configuration)
         {
             _supabaseService = supabaseService;
+            _storageService = storageService;
             _configuration = configuration;
         }
 
@@ -202,6 +204,8 @@ namespace GereltjinCargoApi.Controllers
                 new { Id = userId}
             );
 
+
+
             // Generate order number
             // string name = worker?.name ?? "XX";
             // string initials = name.Length >= 2 
@@ -229,13 +233,22 @@ namespace GereltjinCargoApi.Controllers
 
             // var orderNumber = $"{initials}-{dateStr}-{(todayCount + 1):D3}";
             var orderNumber = request.OrderNumber;
-            // Handle photo upload if present
+
             string? photoUrl = null;
             if (!string.IsNullOrEmpty(request.PhotoBase64))
             {
-                // For now, store as base64 in database
-                // In production, upload to cloud storage (Azure Blob, AWS S3, etc.)
-                photoUrl = request.PhotoBase64;
+                try
+                {
+                    // Upload to Supabase Storage via backend
+                    photoUrl = await _storageService.UploadImageAsync(request.PhotoBase64, orderNumber);
+                    Console.WriteLine($"Photo uploaded successfully: {photoUrl}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Photo upload failed: {ex.Message}");
+                    // Continue without photo - don't fail the entire order creation
+                    photoUrl = null;
+                }
             }
 
             var order = new Order
