@@ -239,13 +239,13 @@ export const OrderEntryScreen = ({ navigation }) => {
           />
           
           <Text style={styles.sectionTitle}>Ачааны Мэдээлэл</Text>
-          <Input
+          {/* <Input
             placeholder="Хүлээн авсан хаяг *"
             value={formData.pickupAddress}
             onChangeText={(value) => handleInputChange('pickupAddress', value)}
             leftIcon={{ type: 'material', name: 'location-on' }}
             multiline={true}
-          />
+          /> */}
           
           <View style={styles.pickerContainer}>
             <Text style={styles.sectionTitle}>Ачааны Төрөл *</Text>

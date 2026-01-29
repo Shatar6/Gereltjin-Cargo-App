@@ -199,7 +199,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
             </ListItem>
           )}
         </Card>
-
+{/* 
         <Card>
           <Text style={styles.sectionTitle}>Хүргэлтийн Мэдээллүүд</Text>
           <ListItem key="pickup-address">
@@ -207,7 +207,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
               <ListItem.Title>Хүлээн авсан хаяг:   {order.pickup_address}</ListItem.Title> 
             </ListItem.Content>
           </ListItem>
-        </Card>
+        </Card> */}
 
         <Card>
           <Text style={styles.sectionTitle}>Ачааны Мэдээлэл</Text>
