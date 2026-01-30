@@ -1,0 +1,15 @@
+# Build folders
+bin/
+obj/
+
+# Debug / temporary files
+*.pdb
+*.dll
+*.exe
+*.log
+
+# IDE folders
+.vs/
+.vscode/
+*.user
+*.suo
