@@ -145,7 +145,6 @@ export const OrderEntryScreen = ({ navigation }) => {
     if (!validateForm()) {
       return;
     }
-    console.log("Submitting order with data:", formData);
 
     setLoading(true);
     try {

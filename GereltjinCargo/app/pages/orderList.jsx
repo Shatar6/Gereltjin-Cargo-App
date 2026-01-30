@@ -19,7 +19,6 @@ export const OrdersListScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const data = await ordersService.getOrders(searchTerm);
-      console.log('Loaded orders:', data);
       setOrders(data);
     } catch (error) {
       Alert.alert('Error', 'Failed to load orders');
@@ -76,7 +75,7 @@ export const OrdersListScreen = ({ navigation }) => {
         return '#FF9800'; // Orange
       case 'delivered': 
         return '#4CAF50'; // Green
-      case 'canceled':
+      case 'cancelled':
         return '#F44336'; // Red
       default: 
         return '#757575'; // Gray
@@ -92,7 +91,7 @@ export const OrdersListScreen = ({ navigation }) => {
         return 'Төлбөр Төлсөн';
       case 'delivered': 
         return 'Хүргэгдсэн';
-      case 'canceled':
+      case 'cancelled':
         return 'Цуцлагдсан';
       default: 
         return status;

@@ -38,8 +38,6 @@ namespace GereltjinCargoApi.Controllers
 
             if (worker == null)
                 return BadRequest(new { message = "Worker not found" });
-            
-            Console.WriteLine($"Worker Code: {worker}");
 
             string workerCode = worker.worker_code; // e.g., "HS12"
 
@@ -335,7 +333,6 @@ namespace GereltjinCargoApi.Controllers
                 {
                     // Upload to Supabase Storage via backend
                     photoUrl = await _storageService.UploadImageAsync(request.PhotoBase64, orderNumber);
-                    Console.WriteLine($"Photo uploaded successfully: {photoUrl}");
                 }
                 catch (Exception ex)
                 {
@@ -426,12 +423,12 @@ namespace GereltjinCargoApi.Controllers
                     }
 
                     // Workers cannot update if status is already "payment_paid" or beyond
-                    if (order.status == "payment_paid" || order.status == "delivered" || order.status == "canceled")
+                    if (order.status == "payment_paid" || order.status == "delivered" || order.status == "cancelled")
                     {
                         return BadRequest(new { message = "Cannot update order after payment is marked as received" });
                     }
                 }
-                // Executives can set to delivered or canceled at any time
+                // Executives can set to delivered or cancelled at any time
 
                 changes["status"] = new { from = order.status, to = request.Status };
                 order.status = request.Status;
@@ -439,7 +436,7 @@ namespace GereltjinCargoApi.Controllers
 
             // Update common fields (all users can update these before payment_paid)
             bool canEditDetails = userRole == "executive" || 
-                                 (order.status != "payment_paid" && order.status != "delivered" && order.status != "canceled");
+                                 (order.status != "payment_paid" && order.status != "delivered" && order.status != "cancelled");
 
             if (canEditDetails)
             {

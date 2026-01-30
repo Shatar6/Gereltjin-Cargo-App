@@ -34,12 +34,9 @@ api.interceptors.request.use(
   async (config) => {
     try {
       const token = await SecureStore.getItemAsync('token');
-      console.log('Token exists:', !!token);
-      console.log('Request URL:', config.url);
       
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log('Auth header set:', config.headers.Authorization.substring(0, 20) + '...');
       }
     } catch (error) {
       console.error('Error getting token:', error);
@@ -55,7 +52,6 @@ api.interceptors.request.use(
 // Response interceptor - handle errors
 api.interceptors.response.use(
   (response) => {
-    console.log('Response success:', response.config.url);
     return response;
   },
   async (error) => {
@@ -117,7 +113,6 @@ export const ordersService = {
   },
 
   updateOrder: async (orderId, updates) => {
-    console.log("API updating order", orderId, "with", updates);
     const response = await api.put(`/orders/${orderId}`, updates);
     return response.data;
   },

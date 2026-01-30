@@ -21,13 +21,13 @@ namespace GereltjinCargoApi.Data
             modelBuilder.Entity<OrderHistory>()
                 .HasOne(h => h.Order)
                 .WithMany(o => o.History)
-                .HasForeignKey(h => h.OrderId)
+                .HasForeignKey(h => h.order_id)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OrderHistory>()
                 .HasOne(h => h.Worker)
                 .WithMany()
-                .HasForeignKey(h => h.WorkerId);
+                .HasForeignKey(h => h.worker_id);
         }
     }
 }

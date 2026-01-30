@@ -2,17 +2,17 @@ namespace GereltjinCargoApi.Models
 {
     public class OrderHistory
 {
-    public Guid Id { get; set; }
-    public Guid OrderId { get; set; }
-    public Guid WorkerId { get; set; }
-    public string WorkerName { get; set; }
-    public string Action { get; set; } // "created", "updated", "status_changed"
-    public string OldStatus { get; set; }
-    public string NewStatus { get; set; }
-    public string Changes { get; set; } // JSON string
-    public DateTime CreatedAt { get; set; }
+    public Guid id  { get; set; }
+    public Guid order_id { get; set; }
+    public Guid worker_id { get; set; }
+    public string? worker_name { get; set; }
+    public string action { get; set; } = string.Empty;
+    public string? old_status { get; set; }
+    public string? new_status { get; set; }
+    public string? changes { get; set; }
+    public DateTime created_at { get; set; }
     
-    public Order Order { get; set; }
-    public Worker Worker { get; set; }
+    public Order? Order { get; set; }
+    public Worker? Worker { get; set; }
 }
 }

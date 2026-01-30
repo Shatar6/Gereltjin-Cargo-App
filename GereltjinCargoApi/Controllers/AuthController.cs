@@ -36,7 +36,7 @@ namespace GereltjinCargoApi.Controllers
             if (worker == null || !BCrypt.Net.BCrypt.Verify(request.Password, worker.password_hash))
                 return Unauthorized(new { message = "Invalid credentials" });
             
-            var token = GenerateJwtToken((Guid)worker.id, worker.email, worker.role);
+            var token = GenerateJwtToken((Guid)worker.id, worker.email, worker.role, worker.name);
             
             return Ok(new LoginResponse 
             { 
@@ -48,7 +48,7 @@ namespace GereltjinCargoApi.Controllers
             });
         }
 
-        private string GenerateJwtToken(Guid userId, string email, string role)
+        private string GenerateJwtToken(Guid userId, string email, string role, string name)
         {
             // Use Supabase:JwtSecret from your secrets
             var jwtSecret = _configuration["Supabase:JwtSecret"] 
@@ -62,6 +62,7 @@ namespace GereltjinCargoApi.Controllers
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim(ClaimTypes.Role, role),
                 new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Name, name),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
