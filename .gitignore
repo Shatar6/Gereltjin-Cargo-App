@@ -14,4 +14,4 @@ obj/
 .vs/
 .vscode/
 *.user
-*.suo
+*.suo 
