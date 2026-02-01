@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "GereltjinCargo",
+    "name": "Gereltjin Cargo",
     "slug": "GereltjinCargo",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,10 +21,17 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": false,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.mvnkhvv.gereltjincargo",
+      "usesCleartextTraffic": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "33c7b0fe-e0e3-4c50-a9ee-134df7684c72"
+      }
     }
   }
 }
