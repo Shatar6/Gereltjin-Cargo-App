@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = 'http://147.224.38.26:5258/api'; 
+const API_URL = 'http://163.192.18.22:5258/api'; 
 
 // const API_URL = Platform.OS === 'android'
 //     ? 'http://10.0.2.2:5258/api'
