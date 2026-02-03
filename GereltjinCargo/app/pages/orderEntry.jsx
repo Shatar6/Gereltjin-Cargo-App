@@ -6,7 +6,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { ordersService } from '../services/api';
 
 export const OrderEntryScreen = ({ navigation }) => {
-  const [nextOrderNumber, setNextOrderNumber] = useState('Loading...');
+  const [workerCode, setWorkerCode] = useState('Loading...'); // Changed from nextOrderNumber
+  const [orderNumberSuffix, setOrderNumberSuffix] = useState('');
   const [showCargoOptions, setShowCargoOptions] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
@@ -44,10 +45,10 @@ export const OrderEntryScreen = ({ navigation }) => {
   const loadNextOrderNumber = async () => {
     try {
       const response = await ordersService.getNextOrderNumber();
-      setNextOrderNumber(response.orderNumber);
+      setWorkerCode(response.workerCode);
     } catch (error) {
       console.error('Error loading next order number:', error);
-      setNextOrderNumber('Error loading');
+      setWorkerCode('Error loading');
     }
   };
 
@@ -109,6 +110,18 @@ export const OrderEntryScreen = ({ navigation }) => {
 
 
   const validateForm = () => {
+    // Validate order number suffix
+    if (!orderNumberSuffix || orderNumberSuffix.trim() === '') {
+      Alert.alert('Алдаа!', 'Захиалгын дугаарын үлдсэн хэсгийг оруулна уу! (жишээ нь: 002, A2, гэх мэт)');
+      return false;
+    }
+
+    // Validate alphanumeric only
+    if (!/^[a-zA-Z0-9]+$/.test(orderNumberSuffix.trim())) {
+      Alert.alert('Алдаа!', 'Захиалгын дугаар зөвхөн үсэг болон тоо агуулж болно!');
+      return false;
+    }
+
     const required = [
       { field: 'customerName', label: 'Илгээгчийн Нэр' },
       { field: 'customerPhone', label: 'Илгээгчийн Утас' },
@@ -149,6 +162,7 @@ export const OrderEntryScreen = ({ navigation }) => {
     setLoading(true);
     try {
       const orderData = {
+        orderNumberSuffix: orderNumberSuffix.trim().toUpperCase(),
         customerName: formData.customerName,
         //OrderNumber: nextOrderNumber,
         customerPhone: formData.customerPhone,
@@ -177,8 +191,8 @@ export const OrderEntryScreen = ({ navigation }) => {
             price: '',
             notes: '',
           });
+          setOrderNumberSuffix(''); 
           setPhoto(null);
-          loadNextOrderNumber();
           navigation.navigate('Orders');
         }}
       ]);
@@ -201,8 +215,28 @@ export const OrderEntryScreen = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
         <Card>
-          
-          <Text h4 style={styles.title}>Захиалгын Дугаар: {nextOrderNumber}</Text>
+          <View style={styles.orderNumberSection}>
+            <Text h4 style={styles.title}>Захиалгын Дугаар</Text>
+            <View style={styles.orderNumberContainer}>
+              <View style={styles.workerCodeBox}>
+                <Text style={styles.workerCodeText}>{workerCode}</Text>
+              </View>
+              <Input
+                placeholder="002, A2, 123X..."
+                value={orderNumberSuffix}
+                onChangeText={setOrderNumberSuffix}
+                containerStyle={styles.suffixInputContainer}
+                inputContainerStyle={styles.suffixInputInner}
+                inputStyle={styles.suffixInput}
+                maxLength={10}
+                autoCapitalize="characters"
+              />
+            </View>
+            <Text style={styles.orderNumberPreview}>
+              Дугаар: {workerCode}{orderNumberSuffix.trim().toUpperCase() || '___'}
+            </Text>
+          </View>
+
           <Text style={styles.sectionTitle}>Илгээгчийн Мэдээлэл</Text>
           <Input
             placeholder="Нэр *"
@@ -349,6 +383,59 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     marginBottom: 20,
+  },
+  orderNumberSection: {
+    marginBottom: 5,
+    padding: 5,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+  },
+  orderNumberContainer: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    height: 50,
+    marginHorizontal: 7,
+  },
+  workerCodeBox: {
+    backgroundColor: '#2196F3',
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginRight: 10,
+    minWidth: 60,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  workerCodeText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  suffixInputContainer: {
+    flex: 1,
+    paddingHorizontal: 0,
+    height: 45,
+  },
+  suffixInputInner: {
+    borderBottomWidth: 0,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    alignItems: 'center',
+  },
+  suffixInput: {
+    fontSize: 18,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  orderNumberPreview: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 5,
   },
   sectionTitle: {
     fontSize: 16,

@@ -102,17 +102,17 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
 
   const handleStatusUpdate = async (newStatus) => {
     Alert.alert(
-      'Төлөв Шинчлэх',
+      'Төлөв Шинэчлэх',
       `Төлвийг "${getStatusLabel(newStatus)}" болгох уу?`,
       [
         { text: 'Цуцлах', style: 'cancel' },
         {
-          text: 'Шинчлэх',
+          text: 'Шинэчлэх',
           onPress: async () => {
             setUpdating(true);
             try {
               await ordersService.updateOrder(order.id, { status: newStatus });
-              Alert.alert('Амжилттай', 'Төлвийг амжилттай шинчиллээ');
+              Alert.alert('Амжилттай', 'Төлвийг амжилттай шинэчиллээ');
               
               // Reload history if executive
               if (userRole === 'executive') {
@@ -123,7 +123,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
               onClose();
             } catch (error) {
               console.error('Update error:', error);
-              Alert.alert('Алдаа', error.response?.data?.message || 'Төлөв шинчлэхэд алдаа гарлаа!');
+              Alert.alert('Алдаа', error.response?.data?.message || 'Төлөв шинэчлэхэд алдаа гарлаа!');
             } finally {
               setUpdating(false);
             }
@@ -157,7 +157,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
     switch (action) {
       case 'created': return 'Үүсгэсэн';
       case 'status_changed': return 'Төлөв өөрчилсөн';
-      case 'updated': return 'Шинчилсэн';
+      case 'updated': return 'Шинэчилсэн';
       default: return action;
     }
   };
@@ -285,7 +285,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
           {/* Status Update Buttons */}
           {statusOptions.length > 0 && (
             <Card>
-              <Text style={styles.sectionTitle}>Төлөв Шинчлэх</Text>
+              <Text style={styles.sectionTitle}>Төлөв Шинэчлэх</Text>
               <View style={styles.statusButtons}>
                 {statusOptions.map((status) => (
                   <Button
@@ -369,7 +369,7 @@ export const OrderDetailModal = ({ visible, order, onClose, onStatusUpdate }) =>
             </Text>
             {order.updated_at && (
               <Text style={styles.timestamp}>
-                Шинчлэсэн: {formatDate(order.updated_at)}
+                Шинэчилсэн: {formatDate(order.updated_at)}
               </Text>
             )}
           </Card>

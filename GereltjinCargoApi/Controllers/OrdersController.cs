@@ -76,55 +76,55 @@ namespace GereltjinCargoApi.Controllers
 
 
             // Extract the letter prefix and starting number
-            string prefix = new string(workerCode.Where(char.IsLetter).ToArray()); // "HS"
-            string numberPart = new string(workerCode.Where(char.IsDigit).ToArray()); // "12"
+            // string prefix = new string(workerCode.Where(char.IsLetter).ToArray()); // "HS"
+            // string numberPart = new string(workerCode.Where(char.IsDigit).ToArray()); // "12"
             
-            if (!int.TryParse(numberPart, out int startingNumber))
-            {
-                return BadRequest(new { message = "Invalid worker code format. Expected format: XX##" });
-            }
+            // if (!int.TryParse(numberPart, out int startingNumber))
+            // {
+            //     return BadRequest(new { message = "Invalid worker code format. Expected format: XX##" });
+            // }
 
-            // Get the last order number for this worker
-            var lastOrder = await connection.QuerySingleOrDefaultAsync<string>(
-                @"SELECT order_number FROM orders 
-                WHERE worker_id = @WorkerId 
-                AND order_number LIKE @CodePattern
-                ORDER BY created_at DESC 
-                LIMIT 1",
-                new { 
-                    WorkerId = userId,
-                    CodePattern = $"{prefix}%"
-                }
-            );
+            // // Get the last order number for this worker
+            // var lastOrder = await connection.QuerySingleOrDefaultAsync<string>(
+            //     @"SELECT order_number FROM orders 
+            //     WHERE worker_id = @WorkerId 
+            //     AND order_number LIKE @CodePattern
+            //     ORDER BY created_at DESC 
+            //     LIMIT 1",
+            //     new { 
+            //         WorkerId = userId,
+            //         CodePattern = $"{prefix}%"
+            //     }
+            // );
 
-            int nextNumber;
-            if (lastOrder != null)
-            {
-                // Extract number from last order (e.g., "HS13" -> "13")
-                string lastNumberStr = new string(lastOrder.Where(char.IsDigit).ToArray());
+            // int nextNumber;
+            // if (lastOrder != null)
+            // {
+            //     // Extract number from last order (e.g., "HS13" -> "13")
+            //     string lastNumberStr = new string(lastOrder.Where(char.IsDigit).ToArray());
                 
-                if (int.TryParse(lastNumberStr, out int lastNumber))
-                {
-                    nextNumber = lastNumber + 1; // HS13 → HS14
-                }
-                else
-                {
-                    // Fallback to starting number if parsing fails
-                    nextNumber = startingNumber;
-                }
-            }
-            else
-            {
-                // First order for this worker, use their starting number
-                nextNumber = startingNumber;
-            }
+            //     if (int.TryParse(lastNumberStr, out int lastNumber))
+            //     {
+            //         nextNumber = lastNumber + 1; // HS13 → HS14
+            //     }
+            //     else
+            //     {
+            //         // Fallback to starting number if parsing fails
+            //         nextNumber = startingNumber;
+            //     }
+            // }
+            // else
+            // {
+            //     // First order for this worker, use their starting number
+            //     nextNumber = startingNumber;
+            // }
 
-            // Generate order number with same digit count as worker code
-            int digitCount = numberPart.Length;
-            string formatString = new string('0', digitCount); // "00" for 2 digits
-            var orderNumber = $"{prefix}{nextNumber.ToString(formatString)}";
+            // // Generate order number with same digit count as worker code
+            // int digitCount = numberPart.Length;
+            // string formatString = new string('0', digitCount); // "00" for 2 digits
+            // var orderNumber = $"{prefix}{nextNumber.ToString(formatString)}";
 
-            return Ok(new { orderNumber });
+            return Ok(new { workerCode = workerCode  });
         }
         
         [HttpGet]
@@ -287,44 +287,62 @@ namespace GereltjinCargoApi.Controllers
             // var orderNumber = request.OrderNumber;
             string workerCode = worker.worker_code;
 
-    
-            // Extract prefix and number
-            string prefix = new string(workerCode.Where(char.IsLetter).ToArray());
-            string numberPart = new string(workerCode.Where(char.IsDigit).ToArray());
-            
-            if (!int.TryParse(numberPart, out int startingNumber))
-            {
-                return BadRequest(new { message = "Invalid worker code format" });
-            }
 
-            // Get last order and calculate next number
-            var lastOrder = await connection.QuerySingleOrDefaultAsync<string>(
-                @"SELECT order_number FROM orders 
-                WHERE worker_id = @WorkerId 
-                AND order_number LIKE @CodePattern
-                ORDER BY created_at DESC 
-                LIMIT 1",
-                new { 
-                    WorkerId = userId,
-                    CodePattern = $"{prefix}%"
-                }
+            // Clean up user input (remove spaces, convert to uppercase)
+            string cleanedSuffix = request.OrderNumberSuffix.Trim().ToUpper();
+
+             // Generate order number: worker_code + suffix
+            var orderNumber = $"{workerCode}{cleanedSuffix}";
+            
+            // // Extract prefix and number
+            // string prefix = new string(workerCode.Where(char.IsLetter).ToArray());
+            // string numberPart = new string(workerCode.Where(char.IsDigit).ToArray());
+            
+            // if (!int.TryParse(numberPart, out int startingNumber))
+            // {
+            //     return BadRequest(new { message = "Invalid worker code format" });
+            // }
+
+            var existingOrder = await connection.QuerySingleOrDefaultAsync<int>(
+                "SELECT COUNT(*) FROM orders WHERE order_number = @OrderNumber",
+                new { OrderNumber = orderNumber }
             );
 
-            int nextNumber;
-            if (lastOrder != null)
+            if (existingOrder > 0)
             {
-                string lastNumberStr = new string(lastOrder.Where(char.IsDigit).ToArray());
-                nextNumber = int.TryParse(lastNumberStr, out int lastNumber) ? lastNumber + 1 : startingNumber;
-            }
-            else
-            {
-                nextNumber = startingNumber;
+                return BadRequest(new { message = $"Order number '{orderNumber}' already exists. Please use a different suffix." });
             }
 
-            // Format with same digit count
-            int digitCount = numberPart.Length;
-            string formatString = new string('0', digitCount);
-            var orderNumber = $"{prefix}{nextNumber.ToString(formatString)}";
+
+
+            // // Get last order and calculate next number
+            // var lastOrder = await connection.QuerySingleOrDefaultAsync<string>(
+            //     @"SELECT order_number FROM orders 
+            //     WHERE worker_id = @WorkerId 
+            //     AND order_number LIKE @CodePattern
+            //     ORDER BY created_at DESC 
+            //     LIMIT 1",
+            //     new { 
+            //         WorkerId = userId,
+            //         CodePattern = $"{prefix}%"
+            //     }
+            // );
+
+            // int nextNumber;
+            // if (lastOrder != null)
+            // {
+            //     string lastNumberStr = new string(lastOrder.Where(char.IsDigit).ToArray());
+            //     nextNumber = int.TryParse(lastNumberStr, out int lastNumber) ? lastNumber + 1 : startingNumber;
+            // }
+            // else
+            // {
+            //     nextNumber = startingNumber;
+            // }
+
+            // // Format with same digit count
+            // int digitCount = numberPart.Length;
+            // string formatString = new string('0', digitCount);
+            // var orderNumber = $"{prefix}{nextNumber.ToString(formatString)}";
 
             string? photoUrl = null;
             if (!string.IsNullOrEmpty(request.PhotoBase64))
@@ -643,6 +661,7 @@ namespace GereltjinCargoApi.Controllers
     
     public class CreateOrderRequest
     {
+        public string OrderNumberSuffix { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;
         //public string OrderNumber { get; set; } = string.Empty;
         public string? CustomerPhone { get; set; }

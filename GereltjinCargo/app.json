@@ -23,7 +23,10 @@
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
       "package": "com.mvnkhvv.gereltjincargo",
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "config": {
+        "usesCleartextTraffic": true
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,6 +35,18 @@
       "eas": {
         "projectId": "33c7b0fe-e0e3-4c50-a9ee-134df7684c72"
       }
-    }
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "networkInspector": true
+          }
+        }
+      ]
+    ]
   }
 }

@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 const API_URL = 'http://163.192.18.22:5258/api'; 
+//const LOCAL_API_URL = 'http://192.168.1.175:5258/api';
 
 // const API_URL = Platform.OS === 'android'
 //     ? 'http://10.0.2.2:5258/api'
@@ -77,7 +78,6 @@ export const authService = {
       await SecureStore.setItemAsync('token', response.data.token);
       await SecureStore.setItemAsync('user', JSON.stringify(response.data));
     }
-    console.log("Response is", response);
     return response.data;
   },
   
@@ -88,7 +88,6 @@ export const authService = {
   
   getToken: async () => {
     const token = await SecureStore.getItemAsync('token');
-    console.log('Retrieved token:', !!token);
     return token;
   },
 
