@@ -13,8 +13,14 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
-    },
+          "supportsTablet": true,
+          "bundleIdentifier": "com.mvnkhvv.gereltjincargo",
+          "buildNumber": "1",
+          "infoPlist": {
+            "NSCameraUsageDescription": "This app needs access to camera to take photos of cargo shipments",
+            "NSPhotoLibraryUsageDescription": "This app needs access to photo library to attach images to orders"
+          }
+        },
     "android": {
       "versionCode": 1,
       "adaptiveIcon": {
