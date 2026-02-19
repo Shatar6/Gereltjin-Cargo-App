@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = 'http://163.192.18.22:5258/api'; 
+const API_URL = 'https://cargo.gereltjin.com/api'; 
 //const LOCAL_API_URL = 'http://192.168.1.175:5258/api';
 
 // const API_URL = Platform.OS === 'android'
